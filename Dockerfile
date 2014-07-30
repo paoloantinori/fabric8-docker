@@ -1,13 +1,19 @@
-FROM fedora
+FROM centos:centos6
 
 # telnet is required by some fabric command. without it you have silent failures
-RUN yum install -y java-1.7.0-openjdk unzip
+RUN yum install -y java-1.7.0-openjdk vi which telnet unzip openssh-server sudo openssh-clients wget
+RUN yum clean all -y
+
+# enable no pass and speed up authentication
+RUN sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords yes/;s/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
+
+# enabling sudo group
+RUN echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+# enabling sudo over ssh
+RUN sed -i 's/.*requiretty$/Defaults !requiretty/' /etc/sudoers
 
 #set the fabric8 version env variable
 ENV FABRIC8_VERSION 1.1.0.CR5
-
-# Clean the metadata
-RUN yum clean all
 
 ENV JAVA_HOME /usr/lib/jvm/jre
 
